@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANIME VERSE — Legendary Characters</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { heading: ['Segoe UI','sans-serif'] },
+        colors: {
+          void: '#05040d',
+          neon: '#ff2d75',
+          cyan: '#00f0ff',
+        },
+        animation: {
+          float: 'float 6s ease-in-out infinite',
+          floatSlow: 'float 9s ease-in-out infinite',
+          spinSlow: 'spin 12s linear infinite',
+          pulseGlow: 'pulseGlow 2.5s ease-in-out infinite',
+          drift: 'drift 25s linear infinite',
+          bounceIn: 'bounceIn .6s cubic-bezier(.25,1.5,.5,1) both',
+        },
+        keyframes: {
+          float: {
+            '0%,100%': { transform: 'translateY(0px) rotate(0deg)' },
+            '50%': { transform: 'translateY(-22px) rotate(3deg)' },
+          },
+          pulseGlow: {
+            '0%,100%': { boxShadow: '0 0 20px 2px currentColor' },
+            '50%': { boxShadow: '0 0 45px 10px currentColor' },
+          },
+          drift: {
+            '0%': { transform: 'translateY(0) translateX(0)' },
+            '100%': { transform: 'translateY(-1000px) translateX(200px)' },
+          },
+          bounceIn: {
+            '0%': { transform: 'scale(0.3)', opacity: 0 },
+            '60%': { transform: 'scale(1.05)', opacity: 1 },
+            '100%': { transform: 'scale(1)' },
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * { scrollbar-width: thin; scrollbar-color: #ff2d75 #05040d; }
+  body { background: #05040d; }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255,45,117,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .hero-glow {
+    background: radial-gradient(circle at 50% 30%, rgba(255,45,117,.35), transparent 60%),
+                radial-gradient(circle at 80% 70%, rgba(0,240,255,.25), transparent 55%);
+  }
+
+  .char-card {
+    transform-style: preserve-3d;
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .char-card:hover {
+    transform: translateY(-14px) rotateX(4deg) rotateY(-4deg) scale(1.03);
+  }
+
+  .avatar-ring {
+    animation: spin 10s linear infinite;
+  }
+  @keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+
+  .clip-hair {
+    clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 55%, 60% 90%, 50% 65%, 40% 90%, 25% 55%, 0% 60%, 10% 20%);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all .7s cubic-bezier(.2,.8,.2,1);
+  }
+  .reveal.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stat-bar span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    transition: width 1.2s ease;
+    border-radius: 9999px;
+  }
+
+  .sparkle {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    animation: sparkleAnim 1s ease-out forwards;
+  }
+  @keyframes sparkleAnim {
+    0% { transform: scale(0) translateY(0); opacity: 1; }
+    100% { transform: scale(1.4) translateY(-60px); opacity: 0; }
+  }
+
+  #modalBackdrop {
+    backdrop-filter: blur(6px);
+    background: rgba(2,1,8,.8);
+  }
+
+  .typewriter::after {
+    content: '|';
+    animation: blink 1s step-start infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #05040d; }
+  ::-webkit-scrollbar-thumb { background: #ff2d75; border-radius: 8px; }
+
+  .nav-link { position: relative; }
+  .nav-link::after {
+    content:'';
+    position:absolute; left:0; bottom:-4px;
+    width:0; height:2px;
+    background: linear-gradient(90deg,#ff2d75,#00f0ff);
+    transition: width .3s ease;
+  }
+  .nav-link:hover::after { width: 100%; }
+</style>
+</head>
+<body class="text-white overflow-x-hidden selection:bg-neon selection:text-white">
+
+<canvas id="particles" class="fixed inset-0 z-0 pointer-events-none"></canvas>
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-void/60 border-b border-white/10">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <div class="text-2xl font-extrabold tracking-widest">
+      <span class="bg-clip-text text-transparent bg-gradient-to-r from-neon to-cyan">ANIME</span><span class="text-white">VERSE</span>
+    </div>
+    <div class="hidden md:flex gap-8 text-sm font-semibold uppercase tracking-wider">
+      <a href="#home" class="nav-link hover:text-neon transition">Home</a>
+      <a href="#characters" class="nav-link hover:text-neon transition">Characters</a>
+      <a href="#battle" class="nav-link hover:text-neon transition">Power Ranks</a>
+      <a href="#about" class="nav-link hover:text-neon transition">About</a>
+    </div>
+    <button id="menuBtn" class="md:hidden text-2xl">☰</button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden flex-col px-6 pb-4 gap-3 text-sm font-semibold uppercase">
+    <a href="#home" class="nav-link">Home</a>
+    <a href="#characters" class="nav-link">Characters</a>
+    <a href="#battle" class="nav-link">Power Ranks</a>
+    <a href="#about" class="nav-link">About</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home" class="relative min-h-screen flex items-center justify-center hero-glow bg-grid overflow-hidden pt-24">
+  <div class="relative z-10 text-center px-6" id="heroContent">
+    <p class="uppercase tracking-[.4em] text-cyan text-sm mb-4 animate-pulse">Enter the</p>
+    <h1 class="text-5xl md:text-8xl font-black leading-tight mb-6">
+      <span class="bg-clip-text text-transparent bg-gradient-to-r from-neon via-fuchsia-400 to-cyan drop-shadow-[0_0_30px_rgba(255,45,117,0.6)]">ANIME</span><br>
+      <span class="text-white">MULTIVERSE</span>
+    </h1>
+    <p class="text-lg md:text-2xl text-gray-300 h-8 typewriter" id="typedText"></p>
+    <div class="mt-10 flex justify-center gap-4 flex-wrap">
+      <a href="#characters" class="px-8 py-3 rounded-full bg-gradient-to-r from-neon to-fuch-500 font-bold uppercase tracking-wide shadow-lg shadow-neon/40 hover:scale-105 transition">Meet the Heroes</a>
+      <a href="#battle" class="px-8 py-3 rounded-full border border-cyan text-cyan font-bold uppercase tracking-wide hover:bg-cyan hover:text-void transition">Power Ranks</a>
+    </div>
+  </div>
+
+  <!-- floating characters silhouettes -->
+  <div class="absolute -left-10 top-1/3 w-40 h-40 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-orange-400 to-red-600 opacity-30 blur-2xl animate-float"></div>
+  <div class="absolute -right-10 bottom-1/4 w-48 h-48 md:w-72 md:h-72 rounded-full bg-gradient-to-br from-cyan to-blue-600 opacity-30 blur-2xl animate-floatSlow"></div>
+  <div class="absolute left-1/3 top-10 w-32 h-32 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-700 opacity-20 blur-2xl animate-float"></div>
+
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-gray-400 text-sm">Scroll ▼</div>
+</section>
+
+<!-- CHARACTERS -->
+<section id="characters" class="relative z-10 py-28 px-6 max-w-7xl mx-auto">
+  <div class="text-center mb-16 reveal">
+    <h2 class="text-4xl md:text-6xl font-black mb-4">Choose Your <span class="text-neon">Legend</span></h2>
+    <p class="text-gray-400 max-w-xl mx-auto">Six legendary heroes from across the anime multiverse. Click a card to view full stats.</p>
+  </div>
+
+  <div id="charGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+</section>
+
+<!-- POWER RANKS -->
+<section id="battle" class="relative z-10 py-28 px-6 max-w-5xl mx-auto">
+  <div class="text-center mb-16 reveal">
+    <h2 class="text-4xl md:text-6xl font-black mb-4">Power <span class="text-cyan">Rankings</span></h2>
+    <p class="text-gray-400">Overall battle power, live-animated from the multiverse database.</p>
+  </div>
+  <div id="rankList" class="space-y-5 reveal"></div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="relative z-10 py-28 px-6 max-w-4xl mx-auto text-center reveal">
+  <h2 class="text-4xl md:text-5xl font-black mb-6">Built for <span class="bg-clip-text text-transparent bg-gradient-to-r from-neon to-cyan">Fans</span></h2>
+  <p class="text-gray-400 leading-relaxed">
+    AnimeVerse is a single-page fan tribute — pure HTML, Tailwind CSS and vanilla JavaScript,
+    all living together in one file. Every glow, float and spark you see is CSS keyframes and canvas
+    particles, no external animation library required.
+  </p>
+</section>
+
+<footer class="relative z-10 border-t border-white/10 py-8 text-center text-gray-500 text-sm">
+  © 2026 AnimeVerse — Fan Project. Made with HTML, Tailwind & JS.
+</footer>
+
+<!-- MODAL -->
+<div id="modalBackdrop" class="fixed inset-0 z-[100] hidden items-center justify-center px-4">
+  <div id="modalCard" class="relative max-w-lg w-full rounded-3xl p-8 border border-white/10 bg-gradient-to-br from-[#120a1f] to-[#05040d] animate-bounceIn">
+    <button id="closeModal" class="absolute top-4 right-5 text-2xl text-gray-400 hover:text-neon transition">✕</button>
+    <div class="flex flex-col items-center text-center">
+      <div id="modalAvatar" class="w-32 h-32 rounded-full flex items-center justify-center text-6xl mb-4 animate-pulseGlow"></div>
+      <h3 id="modalName" class="text-3xl font-black mb-1"></h3>
+      <p id="modalSeries" class="text-cyan uppercase tracking-widest text-xs mb-4"></p>
+      <p id="modalDesc" class="text-gray-300 mb-6"></p>
+      <div id="modalStats" class="w-full space-y-3"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const characters = [
+  {
+    name: "Kaito Fireblade",
+    series: "Chronicles of the Ember Fox",
+    emoji: "🦊",
+    color: "from-orange-400 to-red-600",
+    ring: "text-orange-400",
+    desc: "A hot-blooded ninja who never gives up, fueled by an endless will to protect his friends.",
+    stats: { Power: 88, Speed: 82, Intelligence: 60, Spirit: 97 }
+  },
+  {
+    name: "Ryu Dragonfist",
+    series: "Saiyan Legacy",
+    emoji: "🐉",
+    color: "from-yellow-400 to-orange-500",
+    ring: "text-yellow-400",
+    desc: "An alien warrior chasing the limits of strength, always training to surpass his own power.",
+    stats: { Power: 99, Speed: 90, Intelligence: 55, Spirit: 95 }
+  },
+  {
+    name: "Mira Stormrider",
+    series: "Pirates of the Azure Sea",
+    emoji: "🏴‍☠️",
+    color: "from-cyan to-blue-600",
+    ring: "text-cyan",
+    desc: "A free-spirited captain sailing toward her dream, with rubbery resolve that never breaks.",
+    stats: { Power: 85, Speed: 70, Intelligence: 65, Spirit: 99 }
+  },
+  {
+    name: "Sora Nightblade",
+    series: "Demon Twilight Chronicles",
+    emoji: "🗡️",
+    color: "from-fuchsia-500 to-purple-700",
+    ring: "text-fuchsia-400",
+    desc: "A swordsman with a gentle heart, fighting demons to bring his sister back to normal.",
+    stats: { Power: 80, Speed: 88, Intelligence: 70, Spirit: 92 }
+  },
+  {
+    name: "Eren Titanheart",
+    series: "Beyond the Walls",
+    emoji: "⚔️",
+    color: "from-emerald-400 to-teal-600",
+    ring: "text-emerald-400",
+    desc: "A soldier bound by freedom's obsession, carrying the weight of a world behind giant walls.",
+    stats: { Power: 90, Speed: 75, Intelligence: 78, Spirit: 85 }
+  },
+  {
+    name: "Saito One-Punch",
+    series: "Hero for Fun",
+    emoji: "👊",
+    color: "from-pink-400 to-rose-600",
+    ring: "text-pink-400",
+    desc: "An overpowered hero who trained so hard he lost his hair — one punch ends every fight.",
+    stats: { Power: 100, Speed: 65, Intelligence: 50, Spirit: 100 }
+  }
+];
+
+/* ================= RENDER CHARACTER CARDS ================= */
+const grid = document.getElementById('charGrid');
+characters.forEach((c, i) => {
+  const card = document.createElement('div');
+  card.className = `char-card reveal cursor-pointer rounded-3xl p-6 border border-white/10 bg-white/5 hover:border-white/30 backdrop-blur-sm`;
+  card.style.transitionDelay = `${i * 80}ms`;
+  card.innerHTML = `
+    <div class="relative w-28 h-28 mx-auto mb-5">
+      <div class="absolute inset-0 rounded-full border-2 border-dashed ${c.ring} avatar-ring"></div>
+      <div class="absolute inset-2 rounded-full bg-gradient-to-br ${c.color} flex items-center justify-center text-5xl shadow-lg">${c.emoji}</div>
+    </div>
+    <h3 class="text-xl font-bold text-center mb-1">${c.name}</h3>
+    <p class="text-xs text-center uppercase tracking-widest ${c.ring} mb-4">${c.series}</p>
+    <p class="text-gray-400 text-sm text-center">${c.desc}</p>
+  `;
+  card.addEventListener('click', (e) => openModal(c, e));
+  grid.appendChild(card);
+});
+
+/* ================= RENDER POWER RANKS ================= */
+const rankList = document.getElementById('rankList');
+const ranked = [...characters].sort((a,b) => b.stats.Power - a.stats.Power);
+ranked.forEach((c, i) => {
+  const row = document.createElement('div');
+  row.className = "flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-4";
+  row.innerHTML = `
+    <div class="text-2xl font-black w-10 text-center ${c.ring}">#${i+1}</div>
+    <div class="w-12 h-12 rounded-full bg-gradient-to-br ${c.color} flex items-center justify-center text-2xl">${c.emoji}</div>
+    <div class="flex-1">
+      <div class="flex justify-between text-sm mb-1">
+        <span class="font-semibold">${c.name}</span>
+        <span class="text-gray-400">${c.stats.Power}/100</span>
+      </div>
+      <div class="w-full h-2 bg-white/10 rounded-full stat-bar">
+        <span class="bg-gradient-to-r ${c.color}" data-width="${c.stats.Power}%"></span>
+      </div>
+    </div>
+  `;
+  rankList.appendChild(row);
+});
+
+/* ================= MODAL ================= */
+const modalBackdrop = document.getElementById('modalBackdrop');
+function openModal(c, e) {
+  document.getElementById('modalAvatar').className = `w-32 h-32 rounded-full flex items-center justify-center text-6xl mb-4 animate-pulseGlow bg-gradient-to-br ${c.color} ${c.ring}`;
+  document.getElementById('modalAvatar').textContent = c.emoji;
+  document.getElementById('modalName').textContent = c.name;
+  document.getElementById('modalSeries').textContent = c.series;
+  document.getElementById('modalDesc').textContent = c.desc;
+
+  const statsEl = document.getElementById('modalStats');
+  statsEl.innerHTML = '';
+  Object.entries(c.stats).forEach(([label, val]) => {
+    const bar = document.createElement('div');
+    bar.innerHTML = `
+      <div class="flex justify-between text-xs text-gray-400 mb-1"><span>${label}</span><span>${val}</span></div>
+      <div class="w-full h-2 bg-white/10 rounded-full stat-bar">
+        <span class="bg-gradient-to-r ${c.color}" data-width="${val}%"></span>
+      </div>
+    `;
+    statsEl.appendChild(bar);
+  });
+
+  modalBackdrop.classList.remove('hidden');
+  modalBackdrop.classList.add('flex');
+  requestAnimationFrame(() => {
+    statsEl.querySelectorAll('[data-width]').forEach(el => el.style.width = el.dataset.width);
+  });
+
+  spawnSparkles(e.clientX, e.clientY, c.ring);
+}
+document.getElementById('closeModal').addEventListener('click', () => {
+  modalBackdrop.classList.add('hidden');
+  modalBackdrop.classList.remove('flex');
+});
+modalBackdrop.addEventListener('click', (e) => {
+  if (e.target === modalBackdrop) {
+    modalBackdrop.classList.add('hidden');
+    modalBackdrop.classList.remove('flex');
+  }
+});
+
+/* ================= SPARKLE BURST ON CLICK ================= */
+function spawnSparkles(x, y, colorClass) {
+  for (let i = 0; i < 10; i++) {
+    const s = document.createElement('div');
+    s.className = `sparkle ${colorClass}`;
+    const size = Math.random() * 8 + 4;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = (x + (Math.random()-0.5)*80) + 'px';
+    s.style.top = (y + (Math.random()-0.5)*80) + 'px';
+    s.style.background = 'currentColor';
+    s.style.zIndex = 200;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1000);
+  }
+}
+
+/* ================= TYPEWRITER HERO TEXT ================= */
+const phrases = [
+  "Where every legend collides.",
+  "Six heroes. One multiverse.",
+  "Power. Spirit. Destiny.",
+];
+let pIndex = 0, cIndex = 0, deleting = false;
+const typedEl = document.getElementById('typedText');
+function typeLoop() {
+  const current = phrases[pIndex];
+  if (!deleting) {
+    cIndex++;
+    typedEl.textContent = current.slice(0, cIndex);
+    if (cIndex === current.length) { deleting = true; setTimeout(typeLoop, 1400); return; }
+  } else {
+    cIndex--;
+    typedEl.textContent = current.slice(0, cIndex);
+    if (cIndex === 0) { deleting = false; pIndex = (pIndex+1) % phrases.length; }
+  }
+  setTimeout(typeLoop, deleting ? 40 : 80);
+}
+typeLoop();
+
+/* ================= SCROLL REVEAL ================= */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+      if (entry.target.closest('#battle')) {
+        entry.target.querySelectorAll('[data-width]').forEach(el => el.style.width = el.dataset.width);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ================= MOBILE MENU ================= */
+document.getElementById('menuBtn').addEventListener('click', () => {
+  const menu = document.getElementById('mobileMenu');
+  menu.classList.toggle('hidden');
+  menu.classList.toggle('flex');
+});
+document.querySelectorAll('#mobileMenu a').forEach(a => a.addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.add('hidden');
+  document.getElementById('mobileMenu').classList.remove('flex');
+}));
+
+/* ================= HERO PARALLAX ================= */
+document.addEventListener('mousemove', (e) => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 20;
+  const y = (e.clientY / window.innerHeight - 0.5) * 20;
+  document.getElementById('heroContent').style.transform = `translate(${x}px, ${y}px)`;
+});
+
+/* ================= PARTICLE BACKGROUND (CANVAS) ================= */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = document.body.scrollHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function createParticles() {
+  particles = [];
+  const count = Math.floor((window.innerWidth * canvas.height) / 18000);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.8 + 0.4,
+      speed: Math.random() * 0.4 + 0.1,
+      hue: Math.random() > 0.5 ? '255,45,117' : '0,240,255',
+      alpha: Math.random() * 0.6 + 0.2
+    });
+  }
+}
+createParticles();
+window.addEventListener('resize', createParticles);
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.y -= p.speed;
+    if (p.y < 0) p.y = canvas.height;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${p.hue},${p.alpha})`;
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = `rgba(${p.hue},0.8)`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+/* keep canvas height synced with page after content renders */
+window.addEventListener('load', () => { resizeCanvas(); createParticles(); });
+</script>
+</body>
+</html>
