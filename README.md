@@ -32,7 +32,7 @@ _Add screenshots here_
 
 ## Author
 
-**Ahad**
+**Ahad.WebDev**
 🔗 [GitHub](https://github.com/Ahad2010)
 
 ## License
