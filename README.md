@@ -35,6 +35,4 @@ _Add screenshots here_
 **Ahad.WebDev**
 🔗 [GitHub](https://github.com/Ahad2010)
 
-## License
-
-[MIT](LICENSE)
+ 
