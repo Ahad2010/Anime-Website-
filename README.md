@@ -26,9 +26,7 @@ cd Anime-Website-
 
 Open `index.html` in your browser — that's it, no build step needed.
 
-## Screenshots
-
-_Add screenshots here_
+ 
 
 ## Author
 
