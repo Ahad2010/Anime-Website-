@@ -14,7 +14,8 @@ A simple anime-themed website built with plain HTML.
 ## Tech Stack
 
 - HTML
-
+- Tailwind css
+- Javascript
 ## Getting Started
 
 Clone the repo:
